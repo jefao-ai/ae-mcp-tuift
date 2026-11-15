@@ -1,0 +1,60 @@
+name: Release
+
+# Tag vX.Y.Z -> run the same checks as CI, build the bundle (npm run bundle)
+# and attach after-effects-mcp-X.Y.Z.tgz plus its SHA-256 to a GitHub Release.
+# Nothing is published to npm: the bundle is what apps pin and ship.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and release the bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Check (typecheck / lint / format / docs drift)
+        run: npm run check
+
+      - name: Test (vitest; the After Effects suites skip themselves)
+        run: npm test
+
+      - name: Verify tag matches package.json
+        run: |
+          set -eu
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::version mismatch: tag=$TAG_VERSION package.json=$PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Bundle
+        run: npm run bundle
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          FILE="after-effects-mcp-${GITHUB_REF_NAME#v}.tgz"
+          sha256sum "$FILE" | tee "$FILE.sha256"
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            echo "release ${GITHUB_REF_NAME} already exists - skipping"
+          else
+            gh release create "${GITHUB_REF_NAME}" "$FILE" "$FILE.sha256" \
+              --generate-notes \
+              --title "${GITHUB_REF_NAME}"
+          fi

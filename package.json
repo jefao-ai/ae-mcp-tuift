@@ -1,0 +1,75 @@
+{
+  "name": "ae-mcp-tuift",
+  "version": "0.4.0",
+  "private": true,
+  "description": "MCP server for Adobe After Effects (Windows & macOS) by TUIFT Media: project/comp/layer introspection, undo-grouped operations, JSON export/import, frame and video rendering, motion review and house animation moves, over file IPC. Fork of kumoproductions/mcp-aftereffects v0.3.1.",
+  "keywords": [
+    "adobe",
+    "after-effects",
+    "aftereffects",
+    "claude",
+    "extendscript",
+    "llm",
+    "mcp",
+    "model-context-protocol",
+    "motion-graphics"
+  ],
+  "homepage": "https://github.com/iamjeffia/ae-mcp-tuift#readme",
+  "bugs": {
+    "url": "https://github.com/iamjeffia/ae-mcp-tuift/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "TUIFT Media",
+    "url": "https://github.com/iamjeffia/ae-mcp-tuift"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamjeffia/ae-mcp-tuift.git"
+  },
+  "bin": {
+    "ae-mcp-tuift": "dist/index.js"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint:jsx": "vitest run tests/lint-jsx.test.ts",
+    "docs:tools": "npm run build && node scripts/generate-tools-doc.mjs",
+    "docs:tools:check": "npm run build && node scripts/generate-tools-doc.mjs --check",
+    "check": "npm run typecheck && npm run typecheck:test && npm run lint && npm run format:check && npm run lint:jsx && npm run docs:tools:check",
+    "prepare": "lefthook install",
+    "preversion": "node scripts/release-changelog.mjs --check",
+    "version": "node scripts/release-changelog.mjs && git add CHANGELOG.md",
+    "bundle": "node scripts/bundle.mjs",
+    "bundle:verify": "node scripts/verify-bundle.mjs",
+    "measure:tools": "node scripts/measure-tools.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "lefthook": "^2.1.6",
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
+    "rimraf": "^6.1.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.4"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

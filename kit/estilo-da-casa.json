@@ -1,0 +1,114 @@
+{
+  "_fonte": "Estilo da casa (padrão do servidor): números de mola, curvas, deriva, stagger, revisão e render. A ponte lê a cada chamada; mude aqui para mudar o padrão.",
+  "mola": {
+    "durSec": 0.25,
+    "amp": 0.05,
+    "freq": 2,
+    "decay": 4
+  },
+  "curvas": {
+    "saas": {
+      "out": 86,
+      "in": 93
+    },
+    "entrada": {
+      "out": 33,
+      "in": 33
+    },
+    "board": {
+      "out": 33.3,
+      "in": 77.15
+    }
+  },
+  "vivo": {
+    "freq": 0.5,
+    "ampPx": 6,
+    "rotDeg": 0.4
+  },
+  "motionBlur": {
+    "shutterAngle": 70,
+    "shutterPhase": -35
+  },
+  "stagger": {
+    "letrasSec": 0.035,
+    "itensSec": 0.075,
+    "secoesSec": 0.15
+  },
+  "revisao": {
+    "paradaMortaSec": 0.5,
+    "movimentoMecanicoSec": 0.15,
+    "movimentoPesadoSec": 1.0,
+    "inicioSimultaneoMin": 3,
+    "textoMinPx1080": 22,
+    "margemSeguraPx": 48
+  },
+  "render": {
+    "trechoSec": 30,
+    "trechoSec3d": 15,
+    "trechoSecPesado": 10,
+    "memUsage": [20, 30],
+    "lufs": -14
+  },
+  "camera": {
+    "movimentoMinSec": 0.8,
+    "chicoteSec": 0.27,
+    "zdiveSec": 0.37,
+    "saidaAntesDoFimSec": 0.8,
+    "overlapCenasSec": 0.23,
+    "paradasDePropositoMax": 3
+  },
+  "plano": {
+    "buracoSec": 0.04,
+    "sobreposicaoMaxSec": 0.35,
+    "trocaNaFalaSec": 0.3,
+    "textoMaxPalavras": 9,
+    "perfis": {
+      "narrado": {
+        "cenaMinSec": 3,
+        "cenaMaxSec": 8,
+        "cenasPorMinutoMax": 15,
+        "elementosPor10sMax": 7,
+        "elementosJuntosMax": 3,
+        "semMudarMaxSec": 6,
+        "vidaPrincipalMinSec": 3,
+        "vidaApoioMinSec": 1.5
+      },
+      "cinetico": {
+        "cenaMinSec": 0.4,
+        "semMudarMaxSec": 3,
+        "elementosPor10sMin": 8
+      },
+      "livre": {}
+    }
+  },
+  "avaliacao": {
+    "pronto": 85,
+    "revisar": 70,
+    "silencioDb": -35,
+    "silencioMinSec": 0.5,
+    "silencioLongoSec": 2,
+    "picoMaxDb": -1,
+    "perfis": {
+      "narrado": {
+        "eventosPor10s": [2, 5],
+        "paradoPct": [25, 40],
+        "repousoMaxSec": 6
+      },
+      "cinetico": {
+        "eventosPor10s": [6, 20],
+        "paradoPct": [0, 25],
+        "repousoMaxSec": 1.5
+      },
+      "musica": {
+        "eventosPor10s": [1, 20],
+        "paradoPct": [0, 45],
+        "repousoMaxSec": 3
+      },
+      "livre": {
+        "eventosPor10s": [1, 20],
+        "paradoPct": [0, 60],
+        "repousoMaxSec": 8
+      }
+    }
+  }
+}

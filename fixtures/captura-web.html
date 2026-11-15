@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 320px;
+        height: 180px;
+      }
+      #card {
+        position: absolute;
+        left: 20px;
+        top: 30px;
+        width: 40px;
+        height: 30px;
+        transform-origin: 50% 100%;
+        animation:
+          move 1s linear both,
+          turn 1s linear both;
+      }
+      @keyframes move {
+        from {
+          transform: translateX(0);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(200px);
+          opacity: 1;
+        }
+      }
+      @keyframes turn {
+        from {
+          rotate: 0deg;
+        }
+        to {
+          rotate: 30deg;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="card"></div>
+  </body>
+</html>
