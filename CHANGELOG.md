@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`ae_render_video` on a non-English After Effects**: the render settings and output module templates are now read from the running instance and matched to the requested English name (exact name, known translation, then keyword or codec and bitrate), so aerender no longer fails with "No render settings template was found with the given name" on a Portuguese AE. A name that cannot be matched returns an error listing the valid templates. The chunk folder is created again right before each aerender run.
+
 ## [0.4.0] - 2026-11-15
 
 First release of the TUIFT Media fork of [kumoproductions/mcp-aftereffects](https://github.com/kumoproductions/mcp-aftereffects) v0.3.1, as its own project under the MIT licence (see `NOTICE.md`).

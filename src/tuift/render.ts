@@ -73,6 +73,8 @@ export interface JobOpts {
   aer: string;
   projectArg: string;
   om: string;
+  /** Render settings template as named in this AE (localized); default: the mode's English name. */
+  rs?: string;
   audio?: string;
   fps: number;
   software: boolean;
@@ -503,6 +505,8 @@ async function renderChunk(
 ): Promise<void> {
   const mode = MODES[opts.mode];
   const t0 = Date.now();
+  // aerender falha com "O diretório não existe" se a pasta do trecho sumiu.
+  mkdirSync(path.dirname(ch.file), { recursive: true });
   const args = [
     "-project",
     opts.projectArg,
@@ -513,7 +517,7 @@ async function renderChunk(
     "-e",
     String(ch.e),
     "-RStemplate",
-    mode.rs,
+    opts.rs ?? mode.rs,
     "-OMtemplate",
     opts.om,
     "-output",
@@ -724,13 +728,68 @@ async function finish(
   job.status = "done";
 }
 
+/**
+ * Nomes dos modelos que a ponte pede (em inglês) nas outras línguas do AE. O aerender só aceita o
+ * nome exato da instância: num AE em português, "Best Settings" falha com "No render settings
+ * template was found with the given name".
+ */
+const TRADUCOES: Record<string, string[]> = {
+  "Best Settings": ["Melhores configurações"],
+  "Draft Settings": ["Configurações de rascunho"],
+  "H.264 - Match Render Settings - 40 Mbps": [
+    "H.264 - Corresponder configurações de renderização - 40 Mbps",
+  ],
+};
+/** Último recurso, por palavra-chave, para as línguas sem tradução na tabela. */
+const PISTAS: Record<string, RegExp> = {
+  "Best Settings": /best|melhor|mejor|meilleur|beste|migliori|optim/i,
+  "Draft Settings": /draft|rascunho|borrador|brouillon|entwurf|bozza/i,
+};
+
+const normalizar = (s: string) => s.normalize("NFC").trim().toLowerCase();
+const semAcento = (t: string) => t.normalize("NFD").replace(/\p{M}/gu, "");
+const taxaMbps = (t: string) => /(\d+)\s*mbps/i.exec(t)?.[1];
+const ehH264 = (t: string) => /^h\.?264(?!\d)/i.test(t);
+
+/** Acha na lista da instância o modelo pedido: nome exato, tradução conhecida, depois pista. */
+export function acharModelo(pedido: string, lista: string[] | undefined): string | null {
+  if (!lista?.length) return null;
+  const achar = (nome: string) => lista.find((t) => normalizar(t) === normalizar(nome));
+  const exato = achar(pedido);
+  if (exato) return exato;
+  for (const t of TRADUCOES[pedido] ?? []) {
+    const r = achar(t);
+    if (r) return r;
+  }
+  const pista = PISTAS[pedido];
+  if (pista) return lista.find((t) => pista.test(semAcento(t))) ?? null;
+  // Módulo H.264: mesmo codec e mesma taxa (o resto do nome muda com a língua).
+  const taxa = taxaMbps(pedido);
+  if (ehH264(pedido) && taxa) {
+    const mesmos = lista.filter((t) => ehH264(t) && taxaMbps(t) === taxa);
+    if (mesmos.length === 1) return mesmos[0];
+  }
+  return null;
+}
+
 const INFO_JSX = `
 var c = AE.findCompByNameOrId(payload.comp);
 if (!c) return { ok: false, error: "no comp matching " + String(payload.comp) };
 if (!app.project.file) return { ok: false, error: "save the project to a file first (ae_save_project)" };
-if (payload.save && app.project.dirty) app.project.save();
 var r = ""; try { r = c.renderer; } catch (e) {}
-return { name: c.name, fps: c.frameRate, duration: c.duration, waStart: c.workAreaStart, waDur: c.workAreaDuration,
+// Nomes dos modelos desta instância (mudam com a língua do AE): item de fila temporário, removido logo
+// (antes do save, para o projeto não ficar marcado como alterado).
+var rsT = [], omT = [], lang = "";
+try { lang = app.isoLanguage; } catch (e) {}
+var tmp = null;
+try {
+  tmp = app.project.renderQueue.items.add(c);
+  rsT = tmp.templates;
+  omT = tmp.outputModule(1).templates;
+} catch (e) {}
+try { if (tmp) tmp.remove(); } catch (e) {}
+if (payload.save && app.project.dirty) app.project.save();
+return { rsTemplates: rsT, omTemplates: omT, lang: lang, name: c.name, fps: c.frameRate, duration: c.duration, waStart: c.workAreaStart, waDur: c.workAreaDuration,
   project: app.project.file.fsName.replace(/\\\\/g, "/"), renderer: r, dirty: app.project.dirty };
 `;
 
@@ -862,6 +921,23 @@ export const renderVideoTool = defineTool({
     const style = houseStyle();
     const is3d = /calder|advanced/i.test(String(c.renderer));
     const mode: Mode = args.mode ?? "leve";
+    const rsTemplates: string[] = c.rsTemplates ?? [];
+    const omTemplates: string[] = c.omTemplates ?? [];
+    const omPedido = args.outputModule ?? "H.264 - Match Render Settings - 40 Mbps";
+    // Sem lista (AE antigo, erro no item temporário), segue com o nome pedido.
+    const rs = rsTemplates.length ? acharModelo(MODES[mode].rs, rsTemplates) : MODES[mode].rs;
+    const om = omTemplates.length ? acharModelo(omPedido, omTemplates) : omPedido;
+    if (!rs || !om)
+      return errorResult(
+        "INVALID_ARGS",
+        !rs
+          ? `render settings template "${MODES[mode].rs}" not found in this After Effects (${c.lang})`
+          : `output module template "${omPedido}" not found in this After Effects (${c.lang})`,
+        {
+          details: { renderSettings: rsTemplates, outputModules: omTemplates },
+          hint: "Pass outputModule with one of the names listed (they follow the AE language).",
+        },
+      );
     const baseSec = args.chunkSec ?? (is3d ? style.render.trechoSec3d : style.render.trechoSec);
     // Abrir o aerender custa ~21 s: trecho menor que MIN_CHUNK_SEC gasta mais abrindo do que renderizando.
     const chunkSec =
@@ -909,7 +985,8 @@ export const renderVideoTool = defineTool({
     const runner = startJob(job, {
       aer,
       projectArg,
-      om: args.outputModule ?? "H.264 - Match Render Settings - 40 Mbps",
+      om,
+      rs,
       audio: args.audio,
       fps,
       software: args.software ?? false,
