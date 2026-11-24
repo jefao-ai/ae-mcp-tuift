@@ -14,18 +14,18 @@
     "model-context-protocol",
     "motion-graphics"
   ],
-  "homepage": "https://github.com/iamjeffia/ae-mcp-tuift#readme",
+  "homepage": "https://github.com/jefao-ai/ae-mcp-tuift#readme",
   "bugs": {
-    "url": "https://github.com/iamjeffia/ae-mcp-tuift/issues"
+    "url": "https://github.com/jefao-ai/ae-mcp-tuift/issues"
   },
   "license": "MIT",
   "author": {
     "name": "TUIFT Media",
-    "url": "https://github.com/iamjeffia/ae-mcp-tuift"
+    "url": "https://github.com/jefao-ai/ae-mcp-tuift"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iamjeffia/ae-mcp-tuift.git"
+    "url": "git+https://github.com/jefao-ai/ae-mcp-tuift.git"
   },
   "bin": {
     "ae-mcp-tuift": "dist/index.js"
