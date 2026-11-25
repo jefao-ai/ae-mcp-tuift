@@ -5,7 +5,9 @@ export function buildInstructions(tools: ReadonlySet<string>): string {
   const has = (n: string) => tools.has(n);
   const parts: string[] = [
     "After Effects bridge ae-mcp-tuift (MCP for After Effects + TUIFT Media studio tools).",
-    "Flow: ae_plano_check on the scene plan → ae_context → build (ae_catalog/ae_do; batch.run or one eval.run for a whole scene; tuift.cena names the scenes) →",
+    "Flow: ae_plano_check on the scene plan → ae_context → " +
+      (has("ae_get_skill") ? "ae_get_skill(ae-clean-rig) → " : "") +
+      "build (ae_catalog/ae_do; batch.run for related operations; tuift.cena names the scenes) →",
     "LOOK with ae_see (contact sheet image; check mid-movement frames; cenas: true shows each scene) → ae_review_motion (humano ou robotizado? also checks identidade.json when the project has one) →",
     "ae_expressions_check after writing expressions → ae_sound_cues" +
       (has("ae_place_sfx") ? "/ae_place_sfx" : "") +
@@ -14,6 +16,7 @@ export function buildInstructions(tools: ReadonlySet<string>): string {
         ? " → ae_avaliar_render on the final file (measured score + review packet for an external video reviewer)."
         : "."),
     "Moving a project to another machine: project.collect, or footage.relink to swap path prefixes in bulk.",
+    "For Figma source, use figma.capture_frame, run its read-only script with the authenticated Figma connector, then pass the captured tree to figma.import_frame. Review warnings and render a frame to verify the import.",
     "Ready-made animations by name: tuift.morph {de, para, mola} turns one layer (shape, PNG, text) into another with a",
     'spring ("make the AE icon turn into the Spotify one"); import images with project.import_file + layer.create_footage first.',
     "House moves are ae_do operations in category tuift: tuift.mola (entrance of card/button/bubble/badge, UI morph),",

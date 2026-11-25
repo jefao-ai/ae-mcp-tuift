@@ -40,7 +40,7 @@ describe("mcp server over stdio (offline)", () => {
   const client = new McpTestClient();
 
   beforeAll(async () => {
-    await client.connect();
+    await client.connect({ TUIFT_FNF_SKILLS: "tests/fixtures/no-installed-skill-manifest" });
   });
 
   afterAll(async () => {

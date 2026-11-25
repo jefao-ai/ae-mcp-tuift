@@ -2,6 +2,7 @@
 // Add new operation files here.
 
 import { evalRunEnabled } from "../policy.js";
+import { listOps, registerOp } from "../registry.js";
 
 import "./layer.js";
 import "./keyframe.js";
@@ -34,6 +35,16 @@ import "./instance.js";
 import "./tuift.js";
 import "./morph.js";
 import "./pacote.js";
+import "./cortex.js";
+import "./kit.js";
+import "./tracking.js";
+import "./tracking-analysis.js";
+import "./figma.js";
+
+// Keep saved studio workflows that still use the old tda.* names executable.
+for (const op of listOps("tuift")) {
+  registerOp({ ...op, name: op.name.replace(/^tuift\./, "tda."), category: "tda" });
+}
 
 // eval.run executes arbitrary ExtendScript (file I/O, system.callSystem,
 // Socket, …). Opt-in: it enters the registry only when AE_MCP_ENABLE_EVAL=1

@@ -97,19 +97,22 @@ describe("ae_catalog", () => {
     const p = r.structuredContent as {
       categories: Array<{ category: string; operations: string[] }>;
     };
-    // Every category here is backed by code in this repository; nothing needs an outside panel or library.
+    // Every category here is backed by code in this repository.
     expect(p.categories.map((c) => c.category).filter((c) => c !== "eval")).toEqual([
       "batch",
       "command",
       "comp",
+      "cortex",
       "effect",
       "egp",
       "expression",
+      "figma",
       "font",
       "footage",
       "instance",
       "item",
       "keyframe",
+      ...(getOp("kit.run") ? ["kit"] : []),
       "layer",
       "marker",
       "mask",
@@ -118,13 +121,16 @@ describe("ae_catalog", () => {
       "property",
       "render",
       "shape",
+      "tda",
       "text",
       "timeline",
+      "tracking",
       "transform",
       "tuift",
       "viewer",
     ]);
     expect(p.categories.flatMap((c) => c.operations)).toContain("tuift.mola");
+    expect(p.categories.flatMap((c) => c.operations)).toContain("tda.mola");
   });
 
   it("a category answers with its operations and no legacy note", async () => {

@@ -22,6 +22,8 @@ describe("instance argument", () => {
       const free = [
         "ae_catalog",
         "ae_docs",
+        "ae_get_skill",
+        "ae_get_skill_asset",
         "ae_lessons",
         "ae_render_status",
         "ae_plano_check",

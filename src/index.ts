@@ -15,6 +15,7 @@ import "./operations/index.js";
 import { ALL_TOOLS, type AnyTool } from "./tools/index.js";
 import { withLessons } from "./tuift/lessons.js";
 import { docsAvailable } from "./tuift/docs.js";
+import { skillsAvailable } from "./tuift/skills.js";
 import { buildInstructions } from "./instructions.js";
 import { inProfile, toolProfile } from "./tools/profile.js";
 
@@ -27,12 +28,15 @@ const { version } = require("../package.json") as { version: string };
 const transport = new FileIpcTransport();
 
 const { profile, invalid: invalidProfile } = toolProfile();
+const hasSkills = skillsAvailable();
 
 // Tools of this session: profile, then the optional docs folder, then read-only mode.
 const skipped: string[] = [];
 const selected = ALL_TOOLS.filter((tool) => {
   if (!inProfile(tool.name, profile)) return false;
   if (tool.name === "ae_docs" && !docsAvailable()) return false;
+  if ((tool.name === "ae_get_skill" || tool.name === "ae_get_skill_asset") && !hasSkills)
+    return false;
   if (denyTool(tool.name, tool.blockedInReadOnly)) {
     skipped.push(tool.name);
     return false;

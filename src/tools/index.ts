@@ -30,6 +30,7 @@ import { planoCheckTool } from "../tuift/plano.js";
 import { renderStatusTool, renderVideoTool } from "../tuift/render.js";
 import { reviewMotionTool } from "../tuift/review.js";
 import { seeTool } from "../tuift/see.js";
+import { getSkillAssetTool, getSkillTool } from "../tuift/skills.js";
 import { placeSfxTool, soundCuesTool } from "../tuift/sound.js";
 
 export type AnyTool = {
@@ -64,6 +65,8 @@ export const INSTANCE_PARAM = z
 const INSTANCE_FREE_TOOLS = new Set([
   "ae_catalog",
   "ae_docs",
+  "ae_get_skill",
+  "ae_get_skill_asset",
   "ae_lessons",
   "ae_render_status",
   "ae_plano_check",
@@ -138,6 +141,8 @@ export const ALL_TOOLS: AnyTool[] = [
   catalogTool,
   doTool,
   contextTool,
+  getSkillTool,
+  getSkillAssetTool,
   seeTool,
   reviewMotionTool,
   expressionsCheckTool,

@@ -2,6 +2,54 @@
 
 import { registerOp, jsxVal } from "../registry.js";
 
+registerOp({
+  name: "footage.inventory",
+  category: "footage",
+  description:
+    "Inventory file-backed media with stable item IDs, source paths, missing files, frame rates and interpretation. Useful for external tracking, rotoscoping and media checks.",
+  readOnly: true,
+  params: [
+    { name: "videoOnly", type: "boolean", description: "Only moving video or image sequences." },
+    { name: "offset", type: "number", description: "Number of matching sources to skip." },
+    {
+      name: "limit",
+      type: "number",
+      description: "Maximum entries. Defaults to 100, capped at 500.",
+    },
+  ],
+  toJsx(args) {
+    const offset = Math.max(0, Math.trunc(Number(args.offset ?? 0)));
+    const limit = Math.max(1, Math.min(500, Math.trunc(Number(args.limit ?? 100))));
+    return `
+      var entries = [], total = 0;
+      for (var i = 1; i <= app.project.numItems; i++) {
+        var item = app.project.item(i);
+        if (!(item instanceof FootageItem) || !(item.mainSource instanceof FileSource)) continue;
+        var source = item.mainSource;
+        if (${jsxVal(!!args.videoOnly)} && (!item.hasVideo || source.isStill)) continue;
+        if (total++ < ${offset} || entries.length >= ${limit}) continue;
+        var file = item.file;
+        entries.push({
+          id: item.id,
+          name: item.name,
+          path: file ? file.fsName : (source.missingFootagePath || null),
+          missing: item.footageMissing || !file || !file.exists,
+          proxyActive: item.useProxy,
+          width: item.width, height: item.height, duration: item.duration,
+          still: source.isStill, hasAudio: item.hasAudio, hasVideo: item.hasVideo,
+          frameRate: item.frameRate,
+          interpretation: {
+            nativeFrameRate: AE.safeGet(function () { return source.nativeFrameRate; }, null),
+            conformFrameRate: AE.safeGet(function () { return source.conformFrameRate; }, null),
+            pixelAspect: item.pixelAspect
+          }
+        });
+      }
+      return { ok: true, total: total, offset: ${offset}, entries: entries };
+    `;
+  },
+});
+
 /** Footage-item lookup preamble (defines `_item`, validated as FootageItem). */
 function jsxFootagePreamble(args: Record<string, unknown>): string {
   return `
